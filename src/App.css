@@ -1,0 +1,25 @@
+/* App.css - Reemplaza todo lo anterior con esto */
+
+/* 1. Eliminamos los márgenes y paddings que limitan el diseño */
+#root {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  max-width: none; /* Esto quita el límite de 1280px */
+}
+
+/* 2. Aseguramos que el body no tenga espacios en blanco */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1207; /* El mismo color de tu escena */
+  overflow: hidden; /* Evita que aparezcan barras de scroll innecesarias */
+}
+
+/* 3. Opcional: Importar la fuente para que funcione en todo el proyecto */
+@import url("https://fonts.googleapis.com/css2?family=Calistoga&display=swap");
