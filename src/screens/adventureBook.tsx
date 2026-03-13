@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import "../styles/styles.css"; // Importar estilos
+import "../styles/styles.css";
 
 import { BookCover } from "./BookCover";
 import { ScrapPage } from "./ScrapPage";
@@ -7,7 +7,11 @@ import { PageFlip } from "./PageFlip";
 import { PageNav } from "./PageNav";
 import { PAGES, IMAGES_ENDPOINT } from "../types/constants";
 import { Page, Photo } from "../types/types";
-import { newPhoto, blankPage, collageLayout } from "../utils/photoUtils";
+import {
+  newPhoto,
+  blankPage,
+  distributePhotosAcrossPages,
+} from "../utils/photoUtils";
 
 export default function AdventureBook() {
   const [phase, setPhase] = useState<"closed" | "opening" | "open">("closed");
@@ -20,6 +24,7 @@ export default function AdventureBook() {
   >("idle");
   const [pages, setPages] = useState<Page[]>(() => [...PAGES]);
   const [photos, setPhotos] = useState<Photo[][]>(() => PAGES.map(() => []));
+  const [totalImagesLoaded, setTotalImagesLoaded] = useState(0);
 
   const totalPages = pages.length;
   const targetPage = Math.min(
@@ -43,6 +48,7 @@ export default function AdventureBook() {
     async function loadImages() {
       try {
         setFetchState("loading");
+
         const res = await fetch(IMAGES_ENDPOINT);
 
         if (!res.ok) {
@@ -58,17 +64,28 @@ export default function AdventureBook() {
               ? data.images
               : [];
 
+        setTotalImagesLoaded(items.length);
+
         if (items.length === 0) {
           if (!cancelled) setFetchState("done");
           return;
         }
 
-        const laid = collageLayout(items);
+        // Distribuir las fotos entre las páginas disponibles
+        const distributedPhotos = distributePhotosAcrossPages(
+          items,
+          pages.length,
+        );
+
         if (cancelled) {
-          setPhotos((prev) =>
-            prev.map((list, i) => (i === 0 ? [...list, ...laid] : list)),
-          );
+          setPhotos(distributedPhotos);
           setFetchState("done");
+
+          // Mostrar en consola cuántas fotos se cargaron por página
+          console.log("Fotos cargadas por página:");
+          distributedPhotos.forEach((pagePhotos, index) => {
+            console.log(`Página ${index + 1}: ${pagePhotos.length} fotos`);
+          });
         }
       } catch (err) {
         console.error("Error fetching images:", err);
@@ -83,7 +100,7 @@ export default function AdventureBook() {
     return () => {
       cancelled = true;
     };
-  }, [phase, fetchState]);
+  }, [phase, fetchState, pages.length]);
 
   const handleOpen = () => {
     if (phase !== "closed") return;
@@ -141,9 +158,15 @@ export default function AdventureBook() {
   }, [currentPage, flipping, totalPages]);
 
   const handleAddPhoto = useCallback((pi: number) => {
-    setPhotos((prev) =>
-      prev.map((list, i) => (i === pi ? [...list, newPhoto()] : list)),
-    );
+    // Verificar si ya hay 4 fotos en la página
+    setPhotos((prev) => {
+      const currentPhotos = prev[pi] || [];
+      if (currentPhotos.length >= 4) {
+        alert("Solo puedes tener máximo 4 fotos por página");
+        return prev;
+      }
+      return prev.map((list, i) => (i === pi ? [...list, newPhoto()] : list));
+    });
   }, []);
 
   const handleUpdatePhoto = useCallback(
@@ -182,7 +205,7 @@ export default function AdventureBook() {
             <div className="ab-pages">
               <ScrapPage
                 page={pages[pi]}
-                photos={photos[pi]}
+                photos={photos[pi] || []}
                 onAdd={() => handleAddPhoto(pi)}
                 onUpdate={(id, ch) => handleUpdatePhoto(pi, id, ch)}
                 onDelete={(id) => handleDeletePhoto(pi, id)}
@@ -220,9 +243,37 @@ export default function AdventureBook() {
                   >
                     ⟳
                   </span>
-                  Cargando imágenes…
+                  Cargando imágenes desde Drive...
                 </div>
               )}
+
+              {fetchState === "done" && totalImagesLoaded > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 70,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    zIndex: 90,
+                    background: "rgba(20,50,20,0.9)",
+                    border: "1px solid rgba(100,210,100,0.38)",
+                    borderRadius: 20,
+                    padding: "7px 20px",
+                    color: "rgba(160,255,160,0.93)",
+                    fontFamily: "Caveat,cursive",
+                    fontSize: 15,
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.55)",
+                    whiteSpace: "nowrap",
+                    pointerEvents: "none",
+                    transition: "opacity 2s ease",
+                    opacity: 0.8,
+                  }}
+                >
+                  ✓ {totalImagesLoaded} imágenes cargadas -{" "}
+                  {Math.min(4, photos[pi]?.length || 0)}/4 fotos en esta página
+                </div>
+              )}
+
               {fetchState === "error" && (
                 <div
                   onClick={() => setFetchState("idle")}

@@ -3,38 +3,31 @@ import { TitleLine, Page, Note } from "./types";
 export const TITLE_LINES: TitleLine[] = [
   {
     letters: [
-      { char: "N", color: "#E8B84B" },
+      { char: "O", color: "#E8B84B" },
       { char: "u", color: "#C0392B" },
-      { char: "e", color: "#2ECC71" },
-      { char: "s", color: "#E8B84B" },
-      { char: "t", color: "#3498DB" },
-      { char: "r", color: "#E67E22" },
-      { char: "o", color: "#9B59B6" },
+      { char: "R", color: "#2ECC71" },
     ],
   },
   {
     letters: [
-      { char: "L", color: "#2ECC71" },
-      { char: "i", color: "#E8B84B" },
-      { char: "b", color: "#C0392B" },
-      { char: "r", color: "#3498DB" },
-      { char: "o", color: "#E67E22" },
+      { char: "A", color: "#E8B84B" },
+      { char: "D", color: "#3498DB" },
+      { char: "V", color: "#E67E22" },
+      { char: "E", color: "#9B59B6" },
+      { char: "N", color: "#2ECC71" },
+      { char: "T", color: "#E8B84B" },
+      { char: "U", color: "#C0392B" },
+      { char: "R", color: "#3498DB" },
+      { char: "E", color: "#E67E22" },
       { char: "\u00a0", color: "transparent" },
-      { char: "D", color: "#9B59B6" },
-      { char: "e", color: "#E8B84B" },
     ],
   },
   {
     letters: [
-      { char: "A", color: "#C0392B" },
-      { char: "v", color: "#E8B84B" },
-      { char: "e", color: "#2ECC71" },
-      { char: "n", color: "#3498DB" },
-      { char: "t", color: "#9B59B6" },
-      { char: "u", color: "#E67E22" },
-      { char: "r", color: "#C0392B" },
-      { char: "a", color: "#E8B84B" },
-      { char: "s", color: "#2ECC71" },
+      { char: "B", color: "#C0392B" },
+      { char: "O", color: "#E8B84B" },
+      { char: "O", color: "#2ECC71" },
+      { char: "K", color: "#3498DB" },
     ],
   },
 ];
@@ -135,9 +128,9 @@ export const CURSOR_MAP: Record<string, string> = {
   nw: "nwse-resize",
 };
 
-export const MIN_SIZE = 100;
+export const MIN_SIZE = 200;
 export const BORDER = 10;
 export const PAGE_W = 900;
 export const PAGE_H = 600;
-export const SAFE_H = PAGE_H * 0.68;
+export const SAFE_H = PAGE_H * 0.9;
 export const IMAGES_ENDPOINT = "http://localhost:3000/images";
