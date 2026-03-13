@@ -3,6 +3,16 @@ import { ScrapPageProps } from "../types/types";
 import { PhotoFrame } from "./PhotoFrame";
 import { GlobeStamp } from "./GlobeStamp";
 
+interface ScrapPageProps {
+  page: Page;
+  photos: Photo[];
+  onAdd: () => void;
+  onUpdate: (id: number, changes: Partial<Photo>) => void;
+  onDelete: (id: number) => void;
+  show: boolean;
+  maxPhotos?: number; // Nueva prop opcional
+}
+
 export const ScrapPage: React.FC<ScrapPageProps> = ({
   page,
   photos,
@@ -10,6 +20,7 @@ export const ScrapPage: React.FC<ScrapPageProps> = ({
   onUpdate,
   onDelete,
   show,
+  maxPhotos = 6, // Valor por defecto
 }) => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -106,6 +117,9 @@ export const ScrapPage: React.FC<ScrapPageProps> = ({
         >
           +
         </button>
+      )}
+      {photos.length >= maxPhotos && (
+        <div className="ab-photo-limit-message">Máximo {maxPhotos} fotos</div>
       )}
     </div>
   );

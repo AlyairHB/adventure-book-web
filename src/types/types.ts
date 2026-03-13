@@ -30,6 +30,8 @@ export interface Photo {
   rot: number;
   caption: string;
   src: string | null;
+  driveId?: string;
+  fileName?: string;
 }
 
 export interface ResizeHandleProps {

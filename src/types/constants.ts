@@ -133,4 +133,6 @@ export const BORDER = 10;
 export const PAGE_W = 900;
 export const PAGE_H = 600;
 export const SAFE_H = PAGE_H * 0.9;
+export const PHOTOS_PER_PAGE = 6;
+export const MAX_PAGES = 10;
 export const IMAGES_ENDPOINT = "http://localhost:3000/images";
