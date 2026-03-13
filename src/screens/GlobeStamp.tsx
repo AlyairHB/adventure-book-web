@@ -1,11 +1,10 @@
-// GlobeStamp — vintage hand-drawn globe stamp that appears on select pages.
-// Props: show → bool (triggers fade-in + scale animation via CSS class)
+import React from "react";
+import { GlobeStampProps } from "../types/types";
 
-export default function GlobeStamp({ show }) {
+export const GlobeStamp: React.FC<GlobeStampProps> = ({ show }) => {
   return (
     <div className={`ab-globe${show ? " show" : ""}`}>
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        {/* Outer ring */}
         <circle
           cx="50"
           cy="50"
@@ -14,10 +13,7 @@ export default function GlobeStamp({ show }) {
           stroke="#7a6040"
           strokeWidth="3"
         />
-        {/* Globe surface */}
         <circle cx="50" cy="50" r="40" fill="#9e8a64" />
-
-        {/* Simplified continent shapes */}
         <ellipse
           cx="38"
           cy="40"
@@ -36,8 +32,6 @@ export default function GlobeStamp({ show }) {
         />
         <ellipse cx="50" cy="28" rx="8" ry="6" fill="#6e5a38" opacity="0.70" />
         <ellipse cx="30" cy="62" rx="6" ry="5" fill="#6e5a38" opacity="0.65" />
-
-        {/* Latitude lines */}
         {[25, 40, 55, 70].map((y) => (
           <line
             key={y}
@@ -50,8 +44,6 @@ export default function GlobeStamp({ show }) {
             opacity="0.5"
           />
         ))}
-
-        {/* Longitude lines */}
         {[30, 50, 70].map((x) => (
           <line
             key={x}
@@ -64,8 +56,6 @@ export default function GlobeStamp({ show }) {
             opacity="0.5"
           />
         ))}
-
-        {/* Dashed outer decorative ring */}
         <circle
           cx="50"
           cy="50"
@@ -78,4 +68,4 @@ export default function GlobeStamp({ show }) {
       </svg>
     </div>
   );
-}
+};

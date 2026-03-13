@@ -1,34 +1,25 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { ScrapPageProps } from "../types/types";
 import { PhotoFrame } from "./PhotoFrame";
-import { Photo } from "../types";
+import { GlobeStamp } from "./GlobeStamp";
 
-interface ScrapPageProps {
-  page: any;
-  photos: Photo[];
-  onAdd: () => void;
-  onUpdate: (id: number, updates: Partial<Photo>) => void;
-  onDelete: (id: number) => void;
-  onUpload?: (file: File, id: number) => Promise<void>;
-  show: boolean;
-}
-
-export function ScrapPage({
+export const ScrapPage: React.FC<ScrapPageProps> = ({
   page,
   photos,
   onAdd,
   onUpdate,
   onDelete,
-  onUpload,
   show,
-}: ScrapPageProps) {
+}) => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
 
   const onBgMouseDown = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
     if (
-      e.target === pageRef.current ||
-      (e.target as HTMLElement).classList.contains("ab-kraft") ||
-      (e.target as HTMLElement).classList.contains("ab-gutter")
+      target === pageRef.current ||
+      target.classList.contains("ab-kraft") ||
+      target.classList.contains("ab-gutter")
     ) {
       setSelectedId(null);
     }
@@ -45,29 +36,55 @@ export function ScrapPage({
       }}
     >
       <div className="ab-kraft" />
-
-      {photos.map((photo) => (
+      {photos.map((ph) => (
         <PhotoFrame
-          key={photo.id}
-          photo={photo}
-          selected={selectedId === photo.id}
+          key={ph.id}
+          photo={ph}
+          selected={selectedId === ph.id}
           pageRef={pageRef}
           onSelect={setSelectedId}
           onUpdate={onUpdate}
           onDelete={onDelete}
-          onUpload={onUpload}
           show={show}
         />
       ))}
-
-      {page.globe && <>{/* Tus globos y cintas existentes */}</>}
-
+      {page.globe && (
+        <>
+          <GlobeStamp show={show} />
+          <div
+            className="ab-tape-small"
+            style={{
+              position: "absolute",
+              top: "32%",
+              right: "1.5%",
+              transform: "rotate(-1deg)",
+              opacity: show ? 0.7 : 0,
+              transition: "opacity 0.5s ease 300ms",
+            }}
+          />
+          <div
+            className="ab-tape-small"
+            style={{
+              position: "absolute",
+              top: "41%",
+              right: "1.5%",
+              width: "clamp(50px,8vw,90px)",
+              transform: "rotate(1.5deg)",
+              opacity: show ? 0.7 : 0,
+              transition: "opacity 0.5s ease 380ms",
+            }}
+          />
+        </>
+      )}
       <div className="ab-gutter" />
-
       {show && (
         <button
           onMouseDown={(e) => e.stopPropagation()}
-          onClick={onAdd}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd();
+          }}
+          title="Agregar foto"
           style={{
             position: "absolute",
             bottom: 16,
@@ -81,6 +98,10 @@ export function ScrapPage({
             color: "rgba(255,215,120,0.95)",
             fontSize: 24,
             cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
           }}
         >
           +
@@ -88,4 +109,4 @@ export function ScrapPage({
       )}
     </div>
   );
-}
+};

@@ -1,36 +1,24 @@
-import { useState } from "react";
-import { Photo } from "../types";
+import React, { useState } from "react";
+import { PhotoFrameProps } from "../types/types";
+import { ResizeHandle } from "./ResizeHandle";
+import { BORDER, HANDLES, MIN_SIZE } from "../types/constants";
 
-interface PhotoFrameProps {
-  photo: Photo;
-  selected: boolean;
-  pageRef: React.RefObject<HTMLDivElement>;
-  onSelect: (id: number | null) => void;
-  onUpdate: (id: number, updates: Partial<Photo>) => void;
-  onDelete: (id: number) => void;
-  onUpload?: (file: File, id: number) => Promise<void>;
-  show: boolean;
-}
-
-export function PhotoFrame({
+export const PhotoFrame: React.FC<PhotoFrameProps> = ({
   photo,
   selected,
   pageRef,
   onSelect,
   onUpdate,
   onDelete,
-  onUpload,
   show,
-}: PhotoFrameProps) {
-  const { id, x, y, w, h, rot, caption, src, driveId, uploading } = photo;
+}) => {
+  const { id, x, y, w, h, rot, caption, src } = photo;
   const [editing, setEditing] = useState(false);
-  const [localUploading, setLocalUploading] = useState(false);
   const captionH = Math.max(32, Math.round(h * 0.22));
 
-  // Tu lógica existente de drag & drop...
   const toLocal = (cx: number, cy: number) => {
-    const r = pageRef.current?.getBoundingClientRect();
-    return { lx: cx - (r?.left || 0), ly: cy - (r?.top || 0) };
+    const r = pageRef.current!.getBoundingClientRect();
+    return { lx: cx - r.left, ly: cy - r.top };
   };
 
   const onDragStart = (e: React.MouseEvent) => {
@@ -38,7 +26,6 @@ export function PhotoFrame({
     e.preventDefault();
     e.stopPropagation();
     onSelect(id);
-
     const { lx: sx, ly: sy } = toLocal(e.clientX, e.clientY);
     const ox = x,
       oy = y;
@@ -57,47 +44,59 @@ export function PhotoFrame({
     window.addEventListener("mouseup", up);
   };
 
-  // Manejador de subida de archivos MODIFICADO
-  const onDrop = async (
-    e: React.DragEvent | React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const onResizeStart = (e: React.MouseEvent, dir: string) => {
     e.preventDefault();
+    e.stopPropagation();
+    const { lx: sx, ly: sy } = toLocal(e.clientX, e.clientY);
+    const ox = x,
+      oy = y,
+      ow = w,
+      oh = h;
 
-    let file: File | null = null;
+    const move = (ev: MouseEvent) => {
+      const { lx, ly } = toLocal(ev.clientX, ev.clientY);
+      const dx = lx - sx,
+        dy = ly - sy;
+      let nx = ox,
+        ny = oy,
+        nw = ow,
+        nh = oh;
 
-    if ("dataTransfer" in e) {
-      file = e.dataTransfer?.files[0] || null;
-    } else {
-      file = e.target.files?.[0] || null;
-    }
+      if (dir.includes("e")) nw = Math.max(MIN_SIZE, ow + dx);
+      if (dir.includes("s")) nh = Math.max(MIN_SIZE, oh + dy);
+      if (dir.includes("w")) {
+        nw = Math.max(MIN_SIZE, ow - dx);
+        if (nw > MIN_SIZE) nx = ox + dx;
+      }
+      if (dir.includes("n")) {
+        nh = Math.max(MIN_SIZE, oh - dy);
+        if (nh > MIN_SIZE) ny = oy + dy;
+      }
+      onUpdate(id, { x: nx, y: ny, w: nw, h: nh });
+    };
+
+    const up = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
+
+  const onDrop = (e: React.DragEvent | React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const file =
+      "dataTransfer" in e
+        ? e.dataTransfer?.files[0]
+        : (e.target as HTMLInputElement).files?.[0];
 
     if (!file || !file.type.startsWith("image/")) return;
 
-    // Vista previa local inmediata
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      onUpdate(id, { src: ev.target?.result as string });
-    };
+    reader.onload = (ev) => onUpdate(id, { src: ev.target?.result as string });
     reader.readAsDataURL(file);
-
-    // Subir a Google Drive si hay función de upload
-    if (onUpload) {
-      setLocalUploading(true);
-      onUpdate(id, { uploading: true });
-
-      try {
-        await onUpload(file, id);
-      } catch (error) {
-        console.error("Error en upload:", error);
-      } finally {
-        setLocalUploading(false);
-        onUpdate(id, { uploading: false });
-      }
-    }
   };
-
-  // Si está subiendo, mostrar overlay
-  const showUploading = uploading || localUploading;
 
   return (
     <div
@@ -112,7 +111,7 @@ export function PhotoFrame({
         background: "#fff",
         display: "flex",
         flexDirection: "column",
-        padding: "10px 10px 0 10px",
+        padding: `${BORDER}px ${BORDER}px 0 ${BORDER}px`,
         boxSizing: "border-box",
         boxShadow: selected
           ? "0 0 0 2px #6ab4f5,0 8px 28px rgba(0,0,0,0.38)"
@@ -122,38 +121,8 @@ export function PhotoFrame({
         zIndex: selected ? 40 : 10,
         opacity: show ? 1 : 0,
         transition: "opacity 0.5s ease,box-shadow 0.15s",
-        position: "relative",
       }}
     >
-      {/* Overlay de carga */}
-      {showUploading && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(255,255,255,0.9)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 100,
-            borderRadius: "4px",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "center",
-              fontFamily: "Caveat, cursive",
-              fontSize: 16,
-              color: "#666",
-            }}
-          >
-            <div style={{ marginBottom: 8 }}>✨</div>
-            Subiendo a la nube...
-          </div>
-        </div>
-      )}
-
-      {/* Área de imagen */}
       <div
         style={{
           flex: 1,
@@ -226,9 +195,16 @@ export function PhotoFrame({
             </span>
           </label>
         )}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background:
+              "radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.09) 100%)",
+          }}
+        />
       </div>
-
-      {/* Caption */}
       <div
         style={{
           height: captionH,
@@ -260,6 +236,7 @@ export function PhotoFrame({
               fontSize: Math.max(11, captionH * 0.38),
               color: "#2a2218",
               textAlign: "center",
+              letterSpacing: "0.02em",
             }}
           />
         ) : (
@@ -270,6 +247,7 @@ export function PhotoFrame({
               fontSize: Math.max(11, captionH * 0.38),
               color: caption ? "#2a2218" : "#ccc",
               textAlign: "center",
+              letterSpacing: "0.02em",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -281,29 +259,14 @@ export function PhotoFrame({
           </span>
         )}
       </div>
-
-      {/* Indicador de Drive */}
-      {driveId && !showUploading && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 4,
-            right: 4,
-            fontSize: 10,
-            color: "#999",
-            fontFamily: "Caveat, cursive",
-          }}
-        >
-          ☁️
-        </div>
-      )}
-
-      {/* Resto de tus controles (selección, rotación, eliminación) */}
       {selected && (
         <>
           <button
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => onDelete(id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(id);
+            }}
             style={{
               position: "absolute",
               top: -14,
@@ -321,13 +284,17 @@ export function PhotoFrame({
               alignItems: "center",
               justifyContent: "center",
               zIndex: 50,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
             }}
           >
             ×
           </button>
           <button
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => onUpdate(id, { rot: rot - 5 })}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate(id, { rot: rot - 5 });
+            }}
             style={{
               position: "absolute",
               top: -14,
@@ -340,13 +307,21 @@ export function PhotoFrame({
               color: "#fff",
               cursor: "pointer",
               fontSize: 14,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 50,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
             }}
           >
             ↺
           </button>
           <button
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => onUpdate(id, { rot: rot + 5 })}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate(id, { rot: rot + 5 });
+            }}
             style={{
               position: "absolute",
               top: -14,
@@ -359,12 +334,20 @@ export function PhotoFrame({
               color: "#fff",
               cursor: "pointer",
               fontSize: 14,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 50,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
             }}
           >
             ↻
           </button>
+          {HANDLES.map((dir) => (
+            <ResizeHandle key={dir} dir={dir} onMouseDown={onResizeStart} />
+          ))}
         </>
       )}
     </div>
   );
-}
+};

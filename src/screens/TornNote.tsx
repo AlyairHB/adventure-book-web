@@ -1,17 +1,8 @@
-// TornNote — a torn sheet of paper with a handwritten note and masking tape.
-// Props:
-//   note  → { top, left, w, rot, text }
-//   show  → bool (triggers fade-in)
-//   index → number (0, 1, 2 — controls tape position + stagger delay)
+import React from "react";
+import { TornNoteProps } from "../types/types";
 
-const TAPE_VARIANTS = [
-  { className: "ab-note-tape" }, // centered top
-  { className: "ab-note-tape left" }, // left top
-  { className: "ab-note-tape right" }, // right top
-];
-
-export default function TornNote({ note, show, index }) {
-  const tape = TAPE_VARIANTS[index % TAPE_VARIANTS.length];
+export const TornNote: React.FC<TornNoteProps> = ({ note, show, index }) => {
+  const tapes = ["ab-note-tape", "ab-note-tape left", "ab-note-tape right"];
 
   return (
     <div
@@ -24,8 +15,8 @@ export default function TornNote({ note, show, index }) {
         transitionDelay: `${280 + index * 90}ms`,
       }}
     >
-      <div className={tape.className} />
+      <div className={tapes[index % 3]} />
       <p className="ab-note-text">{note.text}</p>
     </div>
   );
-}
+};

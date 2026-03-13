@@ -1,10 +1,15 @@
-export default function PageNav({
+import React from "react";
+import { PageNavProps } from "../types/types";
+
+export const PageNav: React.FC<PageNavProps> = ({
   currentPage,
   totalPages,
   flipping,
   onPrev,
   onNext,
-}) {
+  onAddPage,
+  onDeletePage,
+}) => {
   return (
     <div className="ab-nav">
       <button
@@ -14,11 +19,9 @@ export default function PageNav({
       >
         ← Anterior
       </button>
-
       <span className="ab-nav-ind">
         {currentPage + 1} / {totalPages}
       </span>
-
       <button
         className="ab-nav-btn"
         onClick={onNext}
@@ -26,6 +29,32 @@ export default function PageNav({
       >
         Siguiente →
       </button>
+      <button
+        className="ab-nav-btn"
+        onClick={onAddPage}
+        disabled={flipping}
+        style={{
+          background: "rgba(20,55,20,0.85)",
+          borderColor: "rgba(100,210,100,0.38)",
+          color: "rgba(160,255,160,0.92)",
+        }}
+      >
+        + Página
+      </button>
+      {totalPages > 1 && (
+        <button
+          className="ab-nav-btn"
+          onClick={onDeletePage}
+          disabled={flipping}
+          style={{
+            background: "rgba(55,15,15,0.85)",
+            borderColor: "rgba(210,80,80,0.38)",
+            color: "rgba(255,150,150,0.92)",
+          }}
+        >
+          ✕ Página
+        </button>
+      )}
     </div>
   );
-}
+};

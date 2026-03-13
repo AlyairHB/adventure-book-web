@@ -1,5 +1,6 @@
-// ─── Title letter definitions ────────────────────────────────
-export const TITLE_LINES = [
+import { TitleLine, Page, Note } from "./types";
+
+export const TITLE_LINES: TitleLine[] = [
   {
     letters: [
       { char: "N", color: "#E8B84B" },
@@ -38,10 +39,7 @@ export const TITLE_LINES = [
   },
 ];
 
-// ─── Page content definitions ────────────────────────────────
-// Photos are now added interactively by the user on each page.
-// Each page only defines: globe (stamp) and notes (static torn paper).
-export const PAGES = [
+export const PAGES: Page[] = [
   {
     id: 1,
     globe: true,
@@ -124,3 +122,22 @@ export const PAGES = [
     ],
   },
 ];
+
+export const HANDLES = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
+export const CURSOR_MAP: Record<string, string> = {
+  n: "ns-resize",
+  ne: "nesw-resize",
+  e: "ew-resize",
+  se: "nwse-resize",
+  s: "ns-resize",
+  sw: "nesw-resize",
+  w: "ew-resize",
+  nw: "nwse-resize",
+};
+
+export const MIN_SIZE = 100;
+export const BORDER = 10;
+export const PAGE_W = 900;
+export const PAGE_H = 600;
+export const SAFE_H = PAGE_H * 0.68;
+export const IMAGES_ENDPOINT = "http://localhost:3000/images";

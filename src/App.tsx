@@ -1,4 +1,4 @@
-import AdventureBook from "./screens/homepage";
+import AdventureBook from "./screens/adventureBook";
 
 function App() {
   return <AdventureBook />;
