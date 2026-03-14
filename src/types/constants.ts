@@ -135,4 +135,4 @@ export const PAGE_H = 600;
 export const SAFE_H = PAGE_H * 0.9;
 export const PHOTOS_PER_PAGE = 6;
 export const MAX_PAGES = 10;
-export const IMAGES_ENDPOINT = "http://localhost:3000/images";
+export const IMAGES_ENDPOINT = "https://express-book-api-l98n.onrender.com/api";

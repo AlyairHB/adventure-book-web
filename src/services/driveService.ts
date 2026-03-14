@@ -1,9 +1,8 @@
 // services/driveConfigService.ts
 // services/driveConfigService.ts
 import { BookConfig } from "../types/bookConfig";
-
-const API_BASE_URL =
-  import.meta.env.REACT_APP_API_URL || "http://localhost:3000";
+import { IMAGES_ENDPOINT } from "../types/constants";
+const API_BASE_URL = IMAGES_ENDPOINT || "http://localhost:3000";
 const CONFIG_FILE_NAME = "book-config.json";
 
 class DriveConfigService {
@@ -32,8 +31,6 @@ class DriveConfigService {
 
       formData.append("config", configFile);
 
-      console.log("📤 Actualizando configuración en Drive:", CONFIG_FILE_NAME);
-
       const response = await fetch(`${API_BASE_URL}/images/config`, {
         method: "POST", // El backend manejará si es crear o actualizar
         body: formData,
@@ -44,7 +41,6 @@ class DriveConfigService {
       }
 
       const result = await response.json();
-      console.log("✅ Configuración actualizada en Drive:", result);
 
       // Guardar el ID del archivo para referencia futura
       if (result.fileId) {
@@ -62,12 +58,9 @@ class DriveConfigService {
   // Cargar la última configuración desde Drive
   async loadFromDrive(): Promise<BookConfig | null> {
     try {
-      console.log("📥 Cargando configuración desde Drive...");
-
       const response = await fetch(`${API_BASE_URL}/images/config/latest`);
 
       if (response.status === 404) {
-        console.log("📭 No hay configuración guardada en Drive");
         return null;
       }
 
@@ -82,12 +75,6 @@ class DriveConfigService {
         this.currentConfigId = data._metadata.id;
         localStorage.setItem("drive_config_id", data._metadata.id);
       }
-
-      console.log("✅ Configuración cargada desde Drive:", {
-        version: data.version,
-        lastSaved: data.lastSaved,
-        pages: data.pages?.length,
-      });
 
       return data;
     } catch (error) {
@@ -133,7 +120,6 @@ class DriveConfigService {
       if (response.ok) {
         localStorage.removeItem("drive_config_id");
         this.currentConfigId = null;
-        console.log("🗑️ Configuración eliminada de Drive");
         return true;
       }
 
