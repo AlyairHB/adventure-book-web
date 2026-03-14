@@ -7,8 +7,10 @@ export interface BookConfig {
   allowUserToDeletePages: boolean;
   allowPhotoUpload: boolean;
   coverConfig: CoverConfig;
-  pages: ConfigPage[];
+  pages: SavedPage[];
   photoLayout: PhotoLayout;
+  lastSaved: string;
+  version: string;
 }
 
 export interface CoverConfig {
@@ -26,10 +28,11 @@ export interface Letter {
   color: string;
 }
 
-export interface ConfigPage {
+export interface SavedPage {
   id: number;
   globe: boolean;
   notes: Note[];
+  photos: SavedPhoto[];
 }
 
 export interface Note {
@@ -38,6 +41,19 @@ export interface Note {
   w: string;
   rot: string;
   text: string;
+}
+
+export interface SavedPhoto {
+  id: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rot: number;
+  caption: string;
+  src: string | null;
+  driveId?: string;
+  fileName?: string;
 }
 
 export interface PhotoLayout {
