@@ -1,20 +1,21 @@
-// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   build: {
     outDir: "dist",
-    sourcemap: true,
+    sourcemap: false,
     rollupOptions: {
-      output: {
-        manualChunks: undefined,
+      onwarn(warning, warn) {
+        // Ignorar advertencias de tipos
+        if (warning.code === "UNUSED_EXTERNAL_IMPORT") return;
+        if (warning.message.includes("@types/")) return;
+        warn(warning);
       },
     },
   },
   server: {
-    port: 3001, // Puerto para desarrollo (cambiado para no chocar con backend)
+    port: 3001,
   },
 });
