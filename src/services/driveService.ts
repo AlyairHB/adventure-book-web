@@ -1,5 +1,6 @@
 // services/driveConfigService.ts
 // services/driveConfigService.ts
+import { error } from "node:console";
 import { BookConfig } from "../types/bookConfig";
 import { IMAGES_ENDPOINT } from "../types/constants";
 const API_BASE_URL = IMAGES_ENDPOINT || "http://localhost:3000";
@@ -65,6 +66,8 @@ class DriveConfigService {
       }
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error(errorData);
         throw new Error(`HTTP ${response.status}`);
       }
 
